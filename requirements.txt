@@ -1,0 +1,6 @@
+numpy
+scikit-learn
+pandas
+openpyxl
+termcolor
+tensorflow[and-cuda]==2.16.2
