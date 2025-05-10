@@ -55,7 +55,7 @@ def sequence_xent_ignore_pad(pad_id: int, vocab_size: int, label_smoothing: floa
 class NaNCallback(keras.callbacks.Callback):
     '''
     Checks for NaN/Inf in input data to model if loss becomes Nan.
-    Utility function.
+    Utility.
     '''
     def __init__(self, train_data, **kwargs):
         super().__init__(**kwargs)
