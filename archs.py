@@ -122,15 +122,15 @@ def _attention(q, k, v, mask, head_dim, dropout, rpb):
     k_t    = ops.transpose(k, axes=[0, 1, 3, 2])          # (B,H,D,T)
     scores = ops.matmul(q, k_t) / ops.sqrt(ops.cast(head_dim, q.dtype))
 
-    # --- relative position bias -------------------------------------------
+    # ------------------- relative position bias -------------------
     if rpb is not None:
-        q_len = layers.Lambda(lambda q: tf.shape(q)[-2])(q)          # dynamic, stays symbolic
+        q_len = layers.Lambda(lambda q: tf.shape(q)[-2])(q)
         k_len = layers.Lambda(lambda k: tf.shape(k)[-2])(k)
 
-        bias  = rpb(q_len, k_len)         # (H,Q,K)
-        bias  = ops.expand_dims(bias, 0)  # (1,H,Q,K)  rank‑4
-        scores = scores + bias            # implicit broadcast over B
-    # ----------------------------------------------------------------------
+        bias  = rpb(q_len, k_len)
+        bias  = ops.expand_dims(bias, 0)
+        scores = scores + bias
+    # --------------------------------------------------------------
 
     if mask is not None:
         scores += (1.0 - ops.cast(mask, scores.dtype)) * -1e9
@@ -341,7 +341,9 @@ class EncoderBlock(keras.Model):
 
 
 class CausalMask(layers.Layer):
-    """Return a (1,1,T,T) lower-triangular mask where T = tf.shape(x)[1]."""
+    '''
+    Return a (1,1,T,T) lower-triangular mask where T = tf.shape(x)[1]
+    '''
     def call(self, x):
         seq_len = tf.shape(x)[1]
         mask = tf.linalg.band_part(tf.ones((seq_len, seq_len), dtype=x.dtype), -1, 0)

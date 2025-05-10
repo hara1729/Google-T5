@@ -3,7 +3,7 @@ import wikipedia
 
 class WikipediaRetriever:
     """
-    Robust wrapper around `wikipedia` that
+    A wrapper around `wikipedia` that
 
     * walks through all disambiguation options until one loads,
     * falls back to `wikipedia.summary` if every page fails, and
@@ -16,7 +16,7 @@ class WikipediaRetriever:
 
     def _try_page(self, title: str) -> str | None:
         try:
-            page = wikipedia.page(title, auto_suggest=False)
+            page = wikipedia.page(title, auto_suggest = False)
             return page.content
         except wikipedia.exceptions.DisambiguationError:
             return None
@@ -41,7 +41,7 @@ class WikipediaRetriever:
 
         # 3) last fallback: short summary API
         try:
-            summary = wikipedia.summary(query, sentences=self.num_sentences, auto_suggest=False)
+            summary = wikipedia.summary(query, sentences = self.num_sentences, auto_suggest = False)
             return summary
         except Exception:
             return ""  # give up gracefully

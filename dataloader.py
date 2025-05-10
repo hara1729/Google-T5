@@ -45,10 +45,8 @@ class WikiQARAGLoader:
     def load_split(self, split: Literal["train", "validation", "test"]) -> tf.data.Dataset:
         """
         Return a `tf.data.Dataset` yielding:
-            ({ "encoder_tokens": int32[seq_len],
-               "decoder_tokens": int32[seq_len] },  # decoder in
-             int32[seq_len])                        # labels (teacher forcing)
-        with padding masked out by the custom loss.
+            (encoder_tokens, decoder_tokens), labels
+        with padding masked out by the custom loss in `nn.py`.
         """
         hf_ds = self._load_and_prepare_split(split)
         tf_ds = self._to_tf_dataset(hf_ds)
@@ -56,14 +54,14 @@ class WikiQARAGLoader:
 
     def _load_and_prepare_split(self, split: str) -> Dataset:
         """Download WikiQA and keep exactly one correct answer per question."""
-        ds = load_dataset("microsoft/wiki_qa", split=split)
+        ds = load_dataset("microsoft/wiki_qa", split = split)
 
         def mark_keep(batch):
             pos = [i for i, lbl in enumerate(batch["label"]) if lbl == 1]
             keep = [i == pos[0] for i in range(len(batch["label"]))] if pos else [False] * len(batch["label"])
             return {"keep": keep}
 
-        ds = ds.map(mark_keep, batched=True, batch_size=None).filter(lambda keep: keep)
+        ds = ds.map(mark_keep, batched = True, batch_size = None).filter(lambda keep: keep)
         DROP_COLS = ["keep", "label", "question_id", "document_title"]
         present = [c for c in DROP_COLS if c in ds.column_names]
         ds = ds.remove_columns(present)
@@ -105,10 +103,10 @@ class WikiQARAGLoader:
         dec_input = [self.pad_id] + dec[:-1]
 
         return {
-            "encoder_tokens": enc,
-            "decoder_tokens": dec_input,
-            "labels":         dec,
-        }
+                    "encoder_tokens": enc,
+                    "decoder_tokens": dec_input,
+                    "labels"        : dec,
+                }
 
     def _to_tf_dataset(self, hf_ds: Dataset) -> tf.data.Dataset:
         '''Convert Hugginface Dataset --> shuffled/batched `tf.data.Dataset.`'''
@@ -123,11 +121,11 @@ class WikiQARAGLoader:
         # generator yields a dict of three int64 arrays
         tf_ds = tf.data.Dataset.from_generator(
                                                     lambda: encoded,
-                                                    output_signature={
+                                                    output_signature = {
                                                                             "encoder_tokens": tf.TensorSpec([self.seq_len], tf.int64),
                                                                             "decoder_tokens": tf.TensorSpec([self.seq_len], tf.int64),
                                                                             "labels":         tf.TensorSpec([self.seq_len], tf.int64),
-                                                                     },
+                                                                        },
                                               )
         # split into (inputs, labels) for model.fit
         tf_ds = tf_ds.map(
@@ -141,8 +139,4 @@ class WikiQARAGLoader:
                             num_parallel_calls = tf.data.AUTOTUNE,
                          )
 
-        return (
-                    tf_ds.shuffle(self.shuffle_buffer, seed = self.seed)
-                        .batch(self.batch_size, drop_remainder = True)
-                        .prefetch(tf.data.AUTOTUNE)
-               )
+        return tf_ds.batch(self.batch_size, drop_remainder = True).prefetch(tf.data.AUTOTUNE)
