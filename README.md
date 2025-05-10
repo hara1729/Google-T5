@@ -19,6 +19,7 @@ Example Training Logs:
 --------------------------------------
 
 Epoch 1/20
+
 318/318 ━━━━━━━━━━━━━━━━━━━━ 231s 605ms/step - loss: 7.4395 - val_accuracy: 0.1344 - val_loss: 6.7044
 Epoch 2/20
 318/318 ━━━━━━━━━━━━━━━━━━━━ 180s 567ms/step - loss: 6.4076 - val_accuracy: 0.1695 - val_loss: 6.3738
