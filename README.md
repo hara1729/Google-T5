@@ -1,4 +1,4 @@
-This is a very simple implemetation of Google's T5 Model from scratch using `TensorFlow/keras` on the `WikiQA` dataset using context fetching via RAG.
+This is a very simple implemetation of Google's T5 Model from scratch using `TensorFlow/keras` on the `WikiQA`and `SQuaD` dataset using context fetching via RAG.
 
 --------------------------------------
 To Run
@@ -15,7 +15,7 @@ Note:
   - This project gives an idea about RAG and custom coding LLMs from scratch. Nothing Else!!!
 
 --------------------------------------
-Example Training Logs:
+Example Training Logs (on WikiQA):
 --------------------------------------
 
 Epoch 1/20
