@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, ops
 
-
+@keras.utils.register_keras_serializable()
 class LayerNorm(layers.Layer):
     def __init__(self, hidden_size: int, epsilon: float = 1e-6, **kwargs):
         super().__init__(**kwargs)
@@ -24,7 +24,7 @@ class LayerNorm(layers.Layer):
         var = ops.mean(ops.square(x - mean), axis = -1, keepdims = True)
         return self.scale * (x - mean) * ops.rsqrt(var + self.epsilon)
 
-
+@keras.utils.register_keras_serializable()
 class RelativePositionBias(layers.Layer):
     def __init__(
                     self,
@@ -76,7 +76,7 @@ class RelativePositionBias(layers.Layer):
         large_val = ops.minimum(large_val, half - 1)
         return res + ops.where(is_small, n, large_val)
 
-
+@keras.utils.register_keras_serializable()
 class ScaledEmbedding(layers.Layer):
     def __init__(self, vocab_size: int, d_model: int, **kwargs):
         super().__init__(**kwargs)
@@ -85,7 +85,7 @@ class ScaledEmbedding(layers.Layer):
     def call(self, x):
         return self.embed(x)
 
-
+@keras.utils.register_keras_serializable()
 class SplitHeads(keras.layers.Layer):
     def __init__(self, num_heads, **kwargs):
         super().__init__(**kwargs)
@@ -97,6 +97,7 @@ class SplitHeads(keras.layers.Layer):
         x = ops.reshape(x, newshape = (b, t, self.num_heads, head_dim))
         return ops.transpose(x, axes = (0, 2, 1, 3))
 
+@keras.utils.register_keras_serializable()
 class MergeHeads(layers.Layer):
     def __init__(self, d_model: int, **kwargs):
         super().__init__(**kwargs)
@@ -144,7 +145,7 @@ def _attention(q, k, v, mask, head_dim, dropout, rpb):
 
 
 
-
+@keras.utils.register_keras_serializable()
 class MultiHeadAttention(keras.Model):
     def __init__(
                     self,
@@ -198,7 +199,7 @@ class MultiHeadAttention(keras.Model):
         length = input_spec[0].shape[1]
         return (batch, length, self.d_model)
 
-
+@keras.utils.register_keras_serializable()
 class GroupedQueryAttention(keras.Model):
     def __init__(
                     self,
@@ -261,6 +262,7 @@ class GroupedQueryAttention(keras.Model):
         length = input_shape[0][1]
         return (batch, length, self.d_model)
 
+@keras.utils.register_keras_serializable()
 class FeedForward(keras.Model):
     def __init__(
                     self,
@@ -282,7 +284,7 @@ class FeedForward(keras.Model):
     def compute_output_shape(self, input_shape):
         return input_shape
 
-
+@keras.utils.register_keras_serializable()
 class EncoderBlock(keras.Model):
     def __init__(
                     self,
@@ -339,7 +341,7 @@ class EncoderBlock(keras.Model):
         length = input_shape[0][1]
         return (batch, length, self.d_model)
 
-
+@keras.utils.register_keras_serializable()
 class CausalMask(layers.Layer):
     '''
     Return a (1,1,T,T) lower-triangular mask where T = tf.shape(x)[1]
@@ -350,7 +352,7 @@ class CausalMask(layers.Layer):
         return mask[None, None]
 
 
-
+@keras.utils.register_keras_serializable()
 class DecoderBlock(keras.Model):
     def __init__(
                     self,
@@ -428,6 +430,7 @@ class DecoderBlock(keras.Model):
         length = input_shape[0][1]
         return (batch, length, self.d_model)
 
+@keras.utils.register_keras_serializable()
 class T5Model(keras.Model):
     def __init__(
                     self,
